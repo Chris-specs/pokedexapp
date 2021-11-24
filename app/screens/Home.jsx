@@ -1,35 +1,69 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, TextInput, FlatList, StyleSheet } from 'react-native';
-import { width, height } from '../utils/dimensions';
+import { width, height, widthR, fontSizeR } from '../utils/dimensions';
 import Background from '../assets/images/background.svg';
 import Card from '../components/Card';
 import { apiInstance } from '../api/instances';
-import Loader from '../components/Loader'
+import Loader from '../components/Loader';
 
 const Home = () => {
     const [pokemons, setPokemons] = useState([]);
     const [quantity, setQuantity] = useState(200);
-    const [loader, setLoader] = useState(false)
+    const [loader, setLoader] = useState(false);
+    const [from, setFrom] = useState(0);
+    const [flag, setFlag] = useState(false);
 
-    const poke = [];
+    let allPokemons = pokemons;
+    let poke = [];
 
     const getPokemons = async () => {
         try {
-            for (let i = 1; i <= quantity; i++) {
-                const response = await apiInstance.get(`/${i}`);
+            for (let i = from == 0 ? 1 : from + 1; i <= from + quantity; i++) {
+                const response = await apiInstance.get(`pokemon/${i}`);
                 poke.push(response.data);
             }
-            setPokemons(poke);
-            setLoader(false)
-        } catch (error) {
-            console.log(error);
-        }
+            const a = allPokemons.concat(poke);
+            setPokemons(a);
+            setLoader(false);
+        } catch (error) {}
+    };
+
+    let timeout = null;
+
+    const waitToSearch = (search) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            setFrom(0);
+            setQuantity(200);
+            setPokemons([]);
+            allPokemons = [];
+            poke = [];
+            searchPokemons(search);
+        }, 1000);
+    };
+
+    const searchPokemons = async (search) => {
+        try {
+            if (search == '') {
+                setFrom(0);
+                setQuantity(200);
+                setPokemons([]);
+                allPokemons = [];
+                poke = [];
+                getPokemons();
+            } else {
+                const response = await apiInstance.get(
+                    `pokemon/${search.toLowerCase()}`
+                );
+                setPokemons([response.data]);
+            }
+        } catch (error) {}
     };
 
     useEffect(() => {
         getPokemons();
         return () => {};
-    }, [quantity]);
+    }, [flag]);
 
     const memoData = useMemo(
         () =>
@@ -39,25 +73,33 @@ const Home = () => {
     );
 
     const getMore = () => {
-            // console.log('MORE', quantity);
-            setQuantity(quantity + 20);
-            setLoader(true)
+        if (!loader) {
+            setFrom(from + quantity);
+            setQuantity(40);
+            setFlag(!flag);
+            setLoader(true);
+        }
     };
 
     return (
         <View style={styles.screen}>
+            <View style={styles.backgroundContainer}>
+                <Background
+                    height={fontSizeR * 0.6}
+                    width={fontSizeR * 0.6}
+                    fill={'#F6F6F6'}
+                    style={styles.background}
+                />
+            </View>
             <View style={styles.innerContainer}>
-                <View style={styles.containerBackground}>
-                    <Text style={styles.title}>Pokedex</Text>
-                    <Background
-                        height={250}
-                        width={250}
-                        fill={'#F6F6F6'}
-                        style={styles.background}
-                    />
-                </View>
+                <Text style={styles.title}>Pokedex</Text>
                 <View style={styles.containerInput}>
-                    <TextInput placeholder='Search' style={styles.input} />
+                    <TextInput
+                        placeholder='Search Pokemons'
+                        placeholderTextColor='#4f6d7a81'
+                        style={styles.input}
+                        onChangeText={(search) => waitToSearch(search)}
+                    />
                 </View>
                 <View style={styles.container}>
                     <View>
@@ -66,14 +108,30 @@ const Home = () => {
                             renderItem={memoData}
                             numColumns={2}
                             keyExtractor={(item, i) => item.name + '-' + i}
-                            style={{ marginTop: '0%', flexGrow: 1, height: '100%' }}
+                            style={{
+                                marginTop: '0%',
+                                flexGrow: 1,
+                                height: '100%',
+                            }}
                             showsVerticalScrollIndicator={false}
-                            onEndReached={() => getMore()}
-                            onEndReachedThreshold={0}
-                            ListFooterComponent={ loader ? <Loader size={ width * 0.10 } /> : null }
-                            ListFooterComponentStyle={{marginVertical: '5%'}}
-                            ListEmptyComponent={<Loader size={ width * 0.15 } />}
-                            contentContainerStyle={ pokemons.length === 0 ? {justifyContent: 'center', alignItems: 'center', flex: 1} : null }
+                            onEndReached={() =>
+                                pokemons.length == 1 ? null : getMore()
+                            }
+                            onEndReachedThreshold={0.01}
+                            ListFooterComponent={
+                                loader ? <Loader size={width * 0.08} /> : null
+                            }
+                            ListFooterComponentStyle={{ marginVertical: '5%' }}
+                            ListEmptyComponent={<Loader size={widthR * 0.15} />}
+                            contentContainerStyle={
+                                pokemons.length === 0
+                                    ? {
+                                          justifyContent: 'center',
+                                          alignItems: 'center',
+                                          flex: 1,
+                                      }
+                                    : null
+                            }
                         />
                     </View>
                 </View>
@@ -84,22 +142,26 @@ const Home = () => {
 
 const styles = StyleSheet.create({
     screen: {
-        width: width,
+        width: '100%',
         height: '100%',
     },
-    innerContainer: {
-        width: width,
+    backgroundContainer: {
+        width: '100%',
         height: '100%',
         backgroundColor: '#FFF',
+        justifyContent: 'flex-start',
+        alignItems: 'flex-end',
+        position: 'absolute',
+        zIndex: 0,
+    },
+    innerContainer: {
+        width: '100%',
+        height: '100%',
         padding: '5%',
-        borderWidth: 2,
-        borderColor: '#e63946',
     },
     container: {
         width: '100%',
         backgroundColor: '#FFF',
-        borderWidth: 2,
-        borderColor: '#e63946',
         flexGrow: 1,
         flexShrink: 1,
     },
@@ -114,21 +176,22 @@ const styles = StyleSheet.create({
         borderColor: '#e63946',
     },
     background: {
-        top: -height * 0.01,
-        right: -width * 0.1,
+        top: -height * 0.07,
+        right: -widthR * 0.18,
     },
     title: {
         fontFamily: 'poppins_bold',
-        fontSize: 35,
+        fontSize: fontSizeR * 0.09,
         color: '#4F6D7A',
+        marginTop: '10%',
     },
     containerInput: {
         width: '100%',
         alignItems: 'center',
-        top: '-5%',
+        marginVertical: '5%',
     },
     input: {
-        width: '80%',
+        width: '100%',
         paddingVertical: 10,
         paddingHorizontal: 20,
         color: '#4F6D7A',
@@ -136,6 +199,8 @@ const styles = StyleSheet.create({
         borderColor: '#EDF6F9',
         borderRadius: 9999,
         backgroundColor: '#FFF',
+        textAlign: 'center',
+        fontFamily: 'poppins_bold',
     },
     contain: {
         width: '100%',

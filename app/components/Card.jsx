@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableHighlight, Image, StyleSheet } from 'react-native';
 import Background from '../assets/images/background.svg';
 import { useNavigation } from '@react-navigation/native';
+import colors from '../utils/colors'
+import { widthR } from '../utils/dimensions'
 
 const Card = ({ data }) => {
 
     const [firstColor, setFirstColor] = useState('#C3C3A5')
     const [secondColor, setSecondColor] = useState('#D2D2B3')
-    // console.log(data.types[0].type.name);
 
     const navigation = useNavigation()
 
@@ -25,28 +26,8 @@ const Card = ({ data }) => {
         }
     }, [])
 
-    const colors = {
-        normal: ['#C3C3A5', '#D2D2B3'],
-        grass: ['#5EDFC5', '#87EAD6'],
-        fire: ['#FC7F7D', '#FE9694'],
-        water: ['#86CAFF', '#ABDAFF'],
-        electric: ['#FEDD86', '#FFE8AB'],
-        ice: ['#86E2FF', '#ABEAFE'],
-        fighting: ['#E27474', '#DC8C8C'],
-        fighting: ['#D0BE8E', '#DFCFA5'],
-        flying: ['#A7CAE4', '#BED7EA'],
-        psychic: ['#CD8EFF', '#DAABFF'],
-        bug: ['#67DCAB', '#86EAC0'],
-        rock: ['#C8BC9D', '#DED1AF'],
-        ghost: ['#9D7CFF', '#C2ADFF'],
-        dark: ['#8E8E8E', '#A3A3A3'],
-        steel: ['#AEAEAE', '#C6C6C6'],
-        fairy: ['#E1A0FF', '#ECC2FF'],
-    }
-
     const goToDetails = () => {
-        console.log('PRESSED => ', data.id);
-        navigation.navigate('Pokemon')
+        navigation.navigate('Pokemon', { data })
     }
     
 
@@ -119,10 +100,10 @@ const styles = StyleSheet.create({
         position: 'absolute',
         zIndex: 0,
         bottom: 0,
-        right: '-10%'
+        right: -widthR * 0.04
     },
     tinyLogo: {
-        width: '60%',
+        width: widthR * 0.25,
         height: '90%',
         marginTop: -20
     },
