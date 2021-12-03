@@ -8,7 +8,7 @@ import Loader from '../components/Loader';
 
 const Home = () => {
     const [pokemons, setPokemons] = useState([]);
-    const [quantity, setQuantity] = useState(200);
+    const [quantity, setQuantity] = useState(40);
     const [loader, setLoader] = useState(false);
     const [from, setFrom] = useState(0);
     const [flag, setFlag] = useState(false);
@@ -34,7 +34,7 @@ const Home = () => {
         clearTimeout(timeout);
         timeout = setTimeout(() => {
             setFrom(0);
-            setQuantity(200);
+            setQuantity(40);
             setPokemons([]);
             allPokemons = [];
             poke = [];
@@ -46,7 +46,7 @@ const Home = () => {
         try {
             if (search == '') {
                 setFrom(0);
-                setQuantity(200);
+                setQuantity(40);
                 setPokemons([]);
                 allPokemons = [];
                 poke = [];
