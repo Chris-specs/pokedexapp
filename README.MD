@@ -1,6 +1,12 @@
 
 # Pokedex App
 
+<div align="center">
+
+  ### <img src="https://github.com/Chris-specs/pokedex-landing/blob/master/public/images/mockup.svg" height="250px"/>
+  
+</div>
+
 This is a free and unoficial project of Pokedex.
 
 For now only Android devices.
@@ -27,4 +33,4 @@ Run project for development 🚧
 ```
 
 ## 
-Developed with ❤️ by [Chris](https://github.com/Chris-specs)
+Made with ❤️ by [Chris](https://github.com/Chris-specs)
